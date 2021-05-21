@@ -52,6 +52,9 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file);
 /* funzione che crea l'albero */
 void CreaAlbero(albero **radice, albero *nodo, FILE *file);
 
+/* funzione che stampa l'albero sul file*/
+void StampaAlbero(albero *nodo, FILE *file);
+
 /* DEFINIZIONE FUNZIONE MAIN */
 int main (void)
 {
@@ -388,7 +391,7 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file)
         
     } while ((esito_id == 0) || (esito_proprietario == 0) || (esito_modello == 0) || (esito_anno == 0));
     
-    
+    StampaAlbero(nodo, file);
 
     
     
@@ -420,3 +423,24 @@ void CreaAlbero(albero **radice, albero *nodo, FILE *file)
     } while ( esito != EOF );
 
 }/* end CreaAlbero */
+
+/* StampaAlbero */
+void StampaAlbero(albero *nodo, FILE *file)
+{
+    /* scorrimento dell'albero partendo dalla radice e stampa di ogni valore su file */
+    if(ApriFileScrittura(file))
+    {
+        if(nodo != NULL)
+        {
+            /* analizzo l'albero partendo dal sotto albero sinistro per poi procedere verso destra */
+            StampaAlbero(nodo -> sx);
+            fprintf(file, "%s\t%s\t%s\t%d\n\r", 
+                    (nodo -> id_veicolo),  (nodo -> nome_proprietario),    (nodo -> modelli),  &(nodo -> anno));
+            printf("ciao\n");
+            StampaAlbero(nodo -> dx);
+        }
+    }
+    else
+        printf("\nCi sono stati problemi durante l'apertura del file, controllare la sua esistenza e/o posizione\n");
+    fclose(file);
+}
