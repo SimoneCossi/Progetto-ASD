@@ -375,7 +375,7 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file)
             else
                 esito_modello = 0;
         } while (esito_modello != 1);
-        tyjt
+        
         do
         {
             printf("\nInserire l'anno del veicolo\n\t");
@@ -384,7 +384,7 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file)
                 esito_anno = 1;
             else
                 esito_anno = 0;
-        } while (/esito_anno != 1);
+        } while (esito_anno != 1);
         
     } while ((esito_id == 0) || (esito_proprietario == 0) || (esito_modello == 0) || (esito_anno == 0));
     
