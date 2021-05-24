@@ -26,7 +26,7 @@ int ApriFileLettura(FILE **file);
 int ApriFileScrittura(FILE **file);
 
 /* funzione che inserisce i valori */
-int Inserimento(albero **radice, albero *nodo);
+int Inserimento(albero **radice, albero *nodo, int *passi);
 
 /* funzione che controlla se i valori tra i nodi sono uguali */
 int NodiUguali(albero *n1, albero *n2);
@@ -47,13 +47,15 @@ int AltraRicerca();
 void VerificaIdVeicolo(char id_veicolo[7]); 
 
 /* funzione che inserisce nuovo veicolo nell'albero specificato dall'utente e ristampa tutto il file aggiornato */
-void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file);
+void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file, int *passi);
 
 /* funzione che crea l'albero */
-void CreaAlbero(albero **radice, albero *nodo, FILE *file);
+void CreaAlbero(albero **radice, albero *nodo, FILE *file, int *passi);
 
 /* funzione che stampa l'albero sul file*/
 void StampaAlbero(albero *nodo, FILE *file);
+
+void StampaAlberoParziale(albero *nodo, FILE *file);
 
 /* DEFINIZIONE FUNZIONE MAIN */
 int main (void)
@@ -68,15 +70,15 @@ int main (void)
     FILE    *dati = NULL;       /* */
     albero  *radice = NULL,     /* nodo radice */
             *nodo   = NULL;     /* nodo per l'inserimento */
-
+    
 
     do
     {
         controllo = ApriFileLettura(&dati);            /* apro il file in lettura */
-        if (controllo == 1)                     /* caso in cui sia stato aperto correttamente il file */
+        if (controllo == 1)                            /* caso in cui sia stato aperto correttamente il file */
         {
             /* lettura dei dati da file e creazione dell'albero */
-            CreaAlbero(&radice, nodo, dati);
+            CreaAlbero(&radice, nodo, dati, &passi);
 
             /* visualizzazione degli id dei veicoli */
             printf("\nLista degli id dei veicoli che sono stati analizzati:\n");
@@ -108,8 +110,9 @@ int main (void)
                 break;
             case 2:     /* caso in cui l'utente desidere aggiungere un elemento*/
                 passi = 0;
-                InserisciNuovoElemento(&radice, nodo, dati);
+                InserisciNuovoElemento(&radice, nodo, dati, &passi);
 
+                printf("\nI passi compiuti dall'algoritmo per inserire i dati sono: %d\n", passi);
                 break;
             default:
                 break;
@@ -134,7 +137,7 @@ int main (void)
     return 0;
 
 }/* end main*/
-
+/******************************************************************************************************************************************/
 /* DEFINIZIONE FUNZIONI */
 
 /* ApriFileLettura */
@@ -162,7 +165,7 @@ int ApriFileScrittura(FILE **file)
 }/* end ApriFileScrittura */
 
 /* Inserimento */
-int Inserimento(albero **radice, albero *nodo)
+int Inserimento(albero **radice, albero *nodo, int *passi)
 {
     /* dichiarazione variabili locali */
     int     esito;          /* variabile di ritorno */
@@ -173,7 +176,7 @@ int Inserimento(albero **radice, albero *nodo)
     for(attuale = padre = *radice;
         ((attuale != NULL) && (!NodiUguali(attuale, nodo)));
         padre = attuale, attuale = NodoMinore(nodo, attuale) ? attuale -> sx : attuale -> dx);
-
+    *passi += 1;
     /* verifica che non ci siano ripetizioni */
     if(attuale != NULL)
         esito = 0;
@@ -190,6 +193,7 @@ int Inserimento(albero **radice, albero *nodo)
             else
                 padre -> dx = nodo;
         }
+        *passi += 1;
     }    
     return esito;
 }/* end Inserimento */
@@ -260,7 +264,7 @@ int CercaIdAlbero(albero *radice, char id_veicolo[6], int *passi)
 }/* end CercaIdAlbero */
 
 /* AltraRicerca */
-int AltraRicerca()
+int AltraRicerca()  /**************************************************************************/
 {
     /* dichiarazione variabili locali */
     int num,
@@ -299,10 +303,10 @@ void VerificaIdVeicolo(char id_veicolo[7])
 }/* end VerificaIdVeicolo*/
 
 /* InserisciNuvoElemento */
-void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file)
+void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file, int *passi)
 {
-    int esito_id = 1,
-        esito_proprietario = 1,
+    int esito_id,
+        esito_proprietario,
         esito_modello,
         esito_anno,
         i = 0;
@@ -310,94 +314,91 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file)
     /* creazione di un nuovo nodo */
     nodo =(albero*)malloc(sizeof(albero));
     nodo -> dx = nodo -> sx = NULL;
-
-    /* acquisizione dei dati a scelta dell'utente */
+   
+    /* ciclo che permette di richiedere all'utente di inserire nuovamente l'id del veicolo correttamente prima di procedere con la prossima domanda */ 
     do
-    {   
-        /* ciclo che permette di richiedere all'utente di inserire nuovamente l'id del veicolo correttamente prima di procedere con la prossima domanda */ 
-        do
+    {
+        printf("\nInserire l'Id del veicolo:\n\t");
+        /* aquisizione e controllo dell'id inserito dall'utente */
+        if((scanf("%s", nodo -> id_veicolo)) == 1)
         {
-            printf("\nInserire l'Id del veicolo:\n\t");
-            /* aquisizione e controllo dell'id inserito dall'utente */
-            if((scanf("%s", nodo->id_veicolo)) == 1)
+            i = 0;
+            /* controllo dell'id inserito dall'utente */
+            do
             {
-                i = 0;
-                /* controllo dell'id inserito dall'utente */
-                do
+                /* controllo dei primi 4 valori come lettere maiuscole */
+                if((i < 5) && ((nodo -> id_veicolo[i] > 64) && (nodo -> id_veicolo[i] < 91)))
+                    esito_id = 1;
+                /* controllo degli ultimi 2 valori come numeri */
+                else if(((i >= 4) && (i < 7)) && ((nodo -> id_veicolo[i] > 47) && (nodo -> id_veicolo[i] < 58)))
+                    esito_id = 1;
+                else
                 {
-                    /* controllo dei primi 4 valori come lettere maiuscole */
-                    if((i < 5) && ((nodo->id_veicolo[i] > 64) && (nodo->id_veicolo[i] < 91)))
-                        esito_id = 1;
-                    /* controllo degli ultimi 2 valori come numeri */
-                    else if(((i >= 4) && (i < 7)) && ((nodo->id_veicolo[i] > 47) && (nodo->id_veicolo[i] < 58)))
-                        esito_id = 1;
-                    else
-                    {
-                        esito_id = 0;
-                        printf("\nIl valore immesso non e' corretto\nInserire solo 4 lettere maiuscole e 2 numeri\n");
-                    }   
-                    i++;
-                } while ((i < 6) && (esito_id == 1));
-            }/* fine del controllo */
-        } while (esito_id != 1); 
+                    esito_id = 0;
+                    printf("\nIl valore immesso non e' corretto\nInserire solo 4 lettere maiuscole e 2 numeri\n");
+                }   
+                i++;
+            } while ((i < 6) && (esito_id == 1));
+        }/* fine del controllo */
+    } while (esito_id != 1); 
         
-        /* ciclo che permette di richiedere all'utente di inserire nuovamente il nome del proprietario del veicolo correttamente prima di procedere con la prossima domanda */
-        do
+    /* ciclo che permette di richiedere all'utente di inserire nuovamente il nome del proprietario del veicolo correttamente prima di procedere con la prossima domanda */
+    do
+    {
+        printf("\nInserire il nome del proprietario\n\t");
+        /* aquisizione e controllo del proprietario inserito dall'utente */
+        if((scanf("%s", nodo -> nome_proprietario)) == 1)
         {
-            printf("\nInserire il nome del proprietario\n\t");
-            /* aquisizione e controllo del proprietario inserito dall'utente */
-            if((scanf("%s", nodo->nome_proprietario)) == 1)
+            i = 0;
+            /* controllo del proprietario inserito dall'utente */
+            do
             {
-                i = 0;
-                /* controllo del proprietario inserito dall'utente */
-                do
+                /* controllo dei primi 3 valori come lettere maiuscole */
+                if((i < 4) && ((nodo -> nome_proprietario[i] > 64) && (nodo -> nome_proprietario[i] < 91)))
+                    esito_proprietario = 1;
+                /* controllo degli ultimi 3 valori come numeri */
+                else if(((i >= 3) && (i < 7)) && ((nodo -> nome_proprietario[i] > 47) && (nodo -> nome_proprietario[i] < 58)))
+                    esito_proprietario = 1;
+                else
                 {
-                    /* controllo dei primi 3 valori come lettere maiuscole */
-                    if((i < 4) && ((nodo->nome_proprietario[i] > 64) && (nodo->nome_proprietario[i] < 91)))
-                        esito_proprietario = 1;
-                    /* controllo degli ultimi 3 valori come numeri */
-                    else if(((i >= 3) && (i < 7)) && ((nodo->nome_proprietario[i] > 47) && (nodo->nome_proprietario[i] < 58)))
-                        esito_proprietario = 1;
-                    else
-                    {
-                        esito_proprietario = 0;
-                        printf("\nIl valore immesso non e' corretto\nInserire solo 3 lettere maiuscole e 3 numeri\n");
-                    }
-                    i++;
-                } while ((i < 6) && (esito_proprietario == 1));
-            }/* fine del controllo */
-        } while (esito_proprietario != 1);
+                    esito_proprietario = 0;
+                    printf("\nIl valore immesso non e' corretto\nInserire solo 3 lettere maiuscole e 3 numeri\n");
+                }
+                i++;
+            } while ((i < 6) && (esito_proprietario == 1));
+        }/* fine del controllo */
+    } while (esito_proprietario != 1);
         
-        /* ciclo che permette di richiedere all'utente di inserire nuovamente il modello del veicolo correttamente prima di procedere con la prossima domanda */
-        do
+    /* ciclo che permette di richiedere all'utente di inserire nuovamente il modello del veicolo correttamente prima di procedere con la prossima domanda */
+    /*********** SE METTI 'SPAZIO' VA IN LOOP IL MODELLO ***********/
+    do
+    {
+        printf("\nInserire il modello del veicolo\n\t");
+        /* acquisizione e controllo del modello inserito dall'utente */
+        if((scanf("%s", nodo -> modelli) ) == 1 && (strlen(nodo -> modelli) < 19))
+            esito_modello = 1;
+        else
         {
-            printf("\nInserire il modello del veicolo\n\t");
-            /* acquisizione e controllo del modello inserito dall'utente */
-            if((scanf("%s", nodo->modelli)) == 1)
-                esito_modello = 1;
-            else
-                esito_modello = 0;
-        } while (esito_modello != 1);
+            esito_modello = 0;
+            printf("\nIl valore immesso non e' corretto\nInserire massimo 20 caratteri separati da un trattino\n");
+        }
+    } while (esito_modello != 1);
         
-        do
+    /*********SE METTI 'LETTERA' VA IN LOOP L'ANNO *********/
+    do
+    {
+         printf("\nInserire l'anno del veicolo\n\t");
+        /* acquisizione e controllo dell'anno del veicolo inserito dall'utente */
+        if(((scanf("%d", &nodo -> anno)) == 1) && ((nodo -> anno > 1899) && (nodo -> anno < 2022)))
+            esito_anno = 1;
+        else
         {
-            printf("\nInserire l'anno del veicolo\n\t");
-            /* acquisizione e controllo dell'anno del veicolo inserito dall'utente */
-            if(((scanf("%d", &nodo -> anno)) == 1) && ((nodo -> anno > 1899) && (nodo -> anno < 2022)))
-                esito_anno = 1;
-            else
-                esito_anno = 0;
-        } while (esito_anno != 1);
-        
-    } while ((esito_id == 0) || (esito_proprietario == 0) || (esito_modello == 0) || (esito_anno == 0));
-    
-    StampaAlbero(nodo, file);
-
-    
-    
-
-
-
+            esito_anno = 0;
+            printf("\nIl valore immesso non e' corretto\nInserire correttamente l'anno\n");
+        }    
+    } while (esito_anno != 1);
+    Inserimento(radice, nodo, passi);
+    StampaAlbero(*radice, file);
 
 
 }/* end InserisciNuovoElemento */
@@ -405,7 +406,7 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file)
 
 
 /* CreaAlbero */
-void CreaAlbero(albero **radice, albero *nodo, FILE *file)
+void CreaAlbero(albero **radice, albero *nodo, FILE *file, int *passi)
 {
     int     esito;
     /* acquisizione dei dati dal file */
@@ -418,7 +419,7 @@ void CreaAlbero(albero **radice, albero *nodo, FILE *file)
         esito = fscanf(file, "%s    %s  %s  %d", 
                       (nodo -> id_veicolo),  (nodo -> nome_proprietario),    (nodo -> modelli),  &(nodo -> anno));
         if(esito == 4)
-            if( !Inserimento(radice, nodo))        /* chiamata alla funzione che crea l'albero */
+            if( !Inserimento(radice, nodo, passi))        /* chiamata alla funzione che crea l'albero */
                 printf("\nInserimento non riuscito\n");
     } while ( esito != EOF );
 
@@ -428,19 +429,24 @@ void CreaAlbero(albero **radice, albero *nodo, FILE *file)
 void StampaAlbero(albero *nodo, FILE *file)
 {
     /* scorrimento dell'albero partendo dalla radice e stampa di ogni valore su file */
-    if(ApriFileScrittura(file))
+    if(ApriFileScrittura(&file))
     {
-        if(nodo != NULL)
-        {
-            /* analizzo l'albero partendo dal sotto albero sinistro per poi procedere verso destra */
-            StampaAlbero(nodo -> sx);
-            fprintf(file, "%s\t%s\t%s\t%d\n\r", 
-                    (nodo -> id_veicolo),  (nodo -> nome_proprietario),    (nodo -> modelli),  &(nodo -> anno));
-            printf("ciao\n");
-            StampaAlbero(nodo -> dx);
-        }
+        printf("file aperto");
+        StampaAlberoParziale(nodo, file);
     }
     else
         printf("\nCi sono stati problemi durante l'apertura del file, controllare la sua esistenza e/o posizione\n");
     fclose(file);
+}
+
+void StampaAlberoParziale(albero *nodo, FILE *file)
+{
+    if(nodo != NULL)
+    {
+        /* analizzo l'albero partendo dal sotto albero sinistro per poi procedere verso destra */
+        StampaAlberoParziale(nodo -> dx, file);
+        fprintf(file, "%s\t%s\t%s\t%d\n\r", 
+                (nodo -> id_veicolo),  (nodo -> nome_proprietario),    (nodo -> modelli),  (nodo -> anno));
+        StampaAlberoParziale(nodo -> sx, file);
+    }
 }
