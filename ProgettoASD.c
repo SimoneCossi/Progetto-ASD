@@ -17,7 +17,9 @@ typedef struct albero
 }albero;
 
 
-/* DICHIARAZIONI FUNZIONI */
+/****************************************************/
+/*              DICHIARAZIONI FUNZIONI              */
+/****************************************************/
 
 /* funzione per l'apertura del file in lettura */
 int ApriFileLettura(FILE **file);
@@ -61,14 +63,22 @@ void StampaAlberoParziale(albero *nodo, FILE *file);
 /* funzione che rimuove un elemento dall'albero */
 int RimuoviElemento(albero **radice, char id_veicolo[7], FILE *file, int *passi);
 
-/* DEFINIZIONE FUNZIONE MAIN */
+/* funzione che restitusce il valore piu' grande */
+int RicercaMax(albero *nodo, int *passi);
+
+/* funzione che restituisce il valore piu' piccolo */
+int RicercaMin(albero *nodo, int *passi);
+
+
+/********************************************************/
+/*              DEFINIZIONE FUNZIONE MAIN               */
+/********************************************************/
 int main (void)
 {
     /* dichiarazione varibili locali */
     int     opzione,            /* variabile utilizzata per scegliere come proseguire */
             verifica,           /* variabile di controllo per verificare il corretto inserimento */
             controllo,          /* utilizzato per il comportamento in base al tentavio di apertura del file */
-            esito,              /* variabile per verificare se l'acquisizione ha dato problemi */
             passi;              /* variabile utilizzata per il conteggio dei passi degli algoritmi */
     char    id_veicolo[7];      /* id del veicolo scelto dall'utente */
     FILE    *dati = NULL;       /* */
@@ -112,20 +122,32 @@ int main (void)
                 printf("\nI passi compiuti dall'algoritmo per trovare e stampare i dati del veicolo richiesto sono: %d\n", passi);
                 
                 break;
+
             case 2:             /* caso in cui l'utente desidere aggiungere un elemento*/
                 passi = 0;
                 InserisciNuovoElemento(&radice, nodo, dati, &passi);
 
                 printf("\nI passi compiuti dall'algoritmo per inserire i dati sono: %d\n", passi);
                 break;
+
             case 3:             /* caso in cui l'utente abbia scelto di rimuovere un elemento */
-                passi = 0;
                 VerificaIdVeicolo(id_veicolo);
                 if(RimuoviElemento(&radice, id_veicolo, dati, &passi) == 0)
                     printf("\nNon e' stato trovato nessun elemento da eliminare\n");
-                    
-                printf("\nI passi compiuti dall'algoritmo per trovare e eliminare un veicolo sono: %d\n", passi);
+                else
+                    printf("Veicolo rimosso\n");
                 break;
+
+            case 4:
+                passi = 0;
+                RicercaMax(radice, &passi);
+                printf("\nI passi compiuti dall'algoritmo per trovare il valore piu' grande sono: %d\n", passi);
+                passi = 0;
+                RicercaMin(radice, &passi);
+                printf("\nI passi compiuti dall'algoritmo per trovare il valore piu' piccolo sono: %d\n", passi);
+                
+                break;
+                
             default:
                 break;
             }
@@ -149,8 +171,11 @@ int main (void)
     return 0;
 
 }/* end main*/
-/******************************************************************************************************************************************/
-/* DEFINIZIONE FUNZIONI */
+
+
+/****************************************************/
+/*              DEFINIZIONE FUNZIONI                */
+/****************************************************/
 
 /* ApriFileLettura */
 int ApriFileLettura(FILE **file)
@@ -384,10 +409,9 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file, int *pass
     } while (esito_proprietario != 1);
         
     /* ciclo che permette di richiedere all'utente di inserire nuovamente il modello del veicolo correttamente prima di procedere con la prossima domanda */
-    /*********** SE METTI 'SPAZIO' VA IN LOOP IL MODELLO ***********/
     do
     {
-        printf("\nInserire il modello del veicolo\n\t");
+        printf("\nInserire il modello del veicolo\nNB. I caratteri dopo uno spazio non verranno acquisiti\n\t");
         /* acquisizione e controllo del modello inserito dall'utente */
         if((scanf("%s", nodo -> modelli) ) == 1 && (strlen(nodo -> modelli) < 19))
             esito_modello = 1;
@@ -396,9 +420,10 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file, int *pass
             esito_modello = 0;
             printf("\nIl valore immesso non e' corretto\nInserire massimo 20 caratteri separati da un trattino\n");
         }
+        while (getchar() != '\n');
     } while (esito_modello != 1);
         
-    /*********SE METTI 'LETTERA' VA IN LOOP L'ANNO *********/
+    /* ciclo che permette di chiedere all'utente di inserire l'anno finchè non ne viene inserito uno accettabile*/
     do
     {
          printf("\nInserire l'anno del veicolo\n\t");
@@ -409,7 +434,8 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file, int *pass
         {
             esito_anno = 0;
             printf("\nIl valore immesso non e' corretto\nInserire correttamente l'anno\n");
-        }    
+        }   
+        while (getchar() != '\n'); 
     } while (esito_anno != 1);
     Inserimento(radice, nodo, passi);
     StampaAlbero(*radice, file);
@@ -516,9 +542,39 @@ int RimuoviElemento(albero **radice, char id_veicolo[7], FILE *file, int *passi)
                     padre -> dx = attuale -> sx;
             }
         free(attuale);
-        *passi += 1;
     }
-    /* chiamata alla funzione per stampare l'albero aggiornato */
     StampaAlbero(*radice, file);
     return (rimosso);
 } /* end RimuoviElemento */
+
+/* RicercaMax */
+int RicercaMax(albero *nodo, int *passi)
+{
+    if(nodo -> sx != NULL)
+    {
+        RicercaMax(nodo -> sx, passi);
+        *passi += 1;
+    }
+    else
+    {
+        printf("\nIl valore piu`grande e':\t%s\n", nodo -> id_veicolo);
+        *passi += 1;        
+    }
+    return 0;
+}/* end RicercaMax */
+ 
+/* RicercaMin */
+int RicercaMin(albero *nodo, int *passi)
+{
+    if(nodo -> dx != NULL)
+    {
+        RicercaMin(nodo -> dx, passi);
+        *passi += 1;
+    }
+    else
+    {
+        printf("\nIl valore piu`grande e':\t%s\n", nodo -> id_veicolo);
+        *passi += 1;        
+    }
+    return 0;
+}/* end RicercaMin */
