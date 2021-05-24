@@ -55,7 +55,11 @@ void CreaAlbero(albero **radice, albero *nodo, FILE *file, int *passi);
 /* funzione che stampa l'albero sul file*/
 void StampaAlbero(albero *nodo, FILE *file);
 
+/* funzione che stampa effetivamente l'albero su file senza aprirlo e chiuderlo*/
 void StampaAlberoParziale(albero *nodo, FILE *file);
+
+/* funzione che rimuove un elemento dall'albero */
+int RimuoviElemento(albero **radice, char id_veicolo[7], FILE *file, int *passi);
 
 /* DEFINIZIONE FUNZIONE MAIN */
 int main (void)
@@ -108,11 +112,19 @@ int main (void)
                 printf("\nI passi compiuti dall'algoritmo per trovare e stampare i dati del veicolo richiesto sono: %d\n", passi);
                 
                 break;
-            case 2:     /* caso in cui l'utente desidere aggiungere un elemento*/
+            case 2:             /* caso in cui l'utente desidere aggiungere un elemento*/
                 passi = 0;
                 InserisciNuovoElemento(&radice, nodo, dati, &passi);
 
                 printf("\nI passi compiuti dall'algoritmo per inserire i dati sono: %d\n", passi);
+                break;
+            case 3:             /* caso in cui l'utente abbia scelto di rimuovere un elemento */
+                passi = 0;
+                VerificaIdVeicolo(id_veicolo);
+                if(RimuoviElemento(&radice, id_veicolo, dati, &passi) == 0)
+                    printf("\nNon e' stato trovato nessun elemento da eliminare\n");
+                    
+                printf("\nI passi compiuti dall'algoritmo per trovare e eliminare un veicolo sono: %d\n", passi);
                 break;
             default:
                 break;
@@ -185,7 +197,9 @@ int Inserimento(albero **radice, albero *nodo, int *passi)
         esito = 1;
 
         if(attuale == *radice)  /* nel caso l'albero sia vuoto inserimento dell'elemento come radice */
+        {
             *radice = nodo;
+        }
         else                    /* altrimenti l'inserimento avviene a sinistra se l'elemento è minore altrimenti a destra */
         { 
             if(NodoMinore(nodo, padre))
@@ -290,7 +304,7 @@ void VerificaIdVeicolo(char id_veicolo[7])
         lunghezza_id;     /* variabile utilizzata per controllare la lunghezza deli'id del veicolo inserito dall'utente */
     
     /* scelta dell veicolo da parte dell'utente */
-    printf("\nInserire l'id di un veicolo sopra-visualizzato di cui si vogliono visualizzare le informazioni\n");
+    printf("\nInserire l'id di un veicolo sopra-visualizzato:\n");
     do
     {
         esito = (scanf("\n%s", id_veicolo));
@@ -399,11 +413,7 @@ void InserisciNuovoElemento(albero **radice, albero *nodo, FILE *file, int *pass
     } while (esito_anno != 1);
     Inserimento(radice, nodo, passi);
     StampaAlbero(*radice, file);
-
-
 }/* end InserisciNuovoElemento */
-
-
 
 /* CreaAlbero */
 void CreaAlbero(albero **radice, albero *nodo, FILE *file, int *passi)
@@ -431,7 +441,6 @@ void StampaAlbero(albero *nodo, FILE *file)
     /* scorrimento dell'albero partendo dalla radice e stampa di ogni valore su file */
     if(ApriFileScrittura(&file))
     {
-        printf("file aperto");
         StampaAlberoParziale(nodo, file);
     }
     else
@@ -439,6 +448,7 @@ void StampaAlbero(albero *nodo, FILE *file)
     fclose(file);
 }
 
+/* StampaAlberoParziale */
 void StampaAlberoParziale(albero *nodo, FILE *file)
 {
     if(nodo != NULL)
@@ -449,4 +459,66 @@ void StampaAlberoParziale(albero *nodo, FILE *file)
                 (nodo -> id_veicolo),  (nodo -> nome_proprietario),    (nodo -> modelli),  (nodo -> anno));
         StampaAlberoParziale(nodo -> sx, file);
     }
-}
+} /* end StampaAlberoParziale */
+
+/* RimuoviElemento */
+int RimuoviElemento(albero **radice, char id_veicolo[7], FILE *file, int *passi)
+{
+    /* dichiarazione variabili locali */
+    int     rimosso;
+    albero  *attuale,
+            *padre,
+            *sostituto;
+    
+    /* scorrimento dell'albero per il posizionamento della foglia */
+    for(attuale = padre = *radice;
+        ((attuale != NULL) && ((strcmp(attuale -> id_veicolo, id_veicolo) != 0)));
+        padre = attuale, attuale = (( strcmp(id_veicolo, attuale -> id_veicolo) < 0) ? (attuale -> sx) : (attuale -> dx)));
+    *passi += 1;
+
+    /* se attuale è vuoto significa che non ci sta nulla da poter rimuovere*/ 
+    if(attuale == NULL)
+        rimosso = 0;
+    else
+    {
+        rimosso = 1;
+        if(attuale -> sx == NULL)
+        {
+            if(attuale == *radice)
+                *radice = attuale -> dx;
+            else
+                if((strcmp(id_veicolo, padre -> id_veicolo)) < 0 )
+                    padre -> sx = attuale -> dx;
+                else
+                    padre -> dx = attuale -> dx;
+        }
+        else
+            if(attuale -> dx == NULL)
+            {
+                if(attuale == *radice)
+                    *radice = attuale -> sx;
+                else
+                    if( (strcmp(id_veicolo, padre -> id_veicolo ) < 0))
+                        padre -> sx = attuale -> sx;
+                    else
+                        padre -> dx = attuale -> sx;
+            }
+            else
+            {
+                sostituto = attuale;
+                for(padre = sostituto, attuale = sostituto -> sx;
+                    (attuale -> dx != NULL); padre = attuale, attuale = attuale -> dx);
+                strcpy(sostituto -> id_veicolo, attuale -> id_veicolo);
+
+                if(padre == sostituto)
+                    padre -> sx = attuale -> sx;
+                else    
+                    padre -> dx = attuale -> sx;
+            }
+        free(attuale);
+        *passi += 1;
+    }
+    /* chiamata alla funzione per stampare l'albero aggiornato */
+    StampaAlbero(*radice, file);
+    return (rimosso);
+} /* end RimuoviElemento */
