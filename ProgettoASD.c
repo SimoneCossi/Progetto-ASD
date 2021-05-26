@@ -117,7 +117,7 @@ int main (void)
                     printf("\nNon e' stato trovato alcun veicolo, (attenzione inserire lettere maiuscole!)\n");
                     
                 printf("\nI passi compiuti dall'algoritmo per trovare e stampare i dati del veicolo richiesto sono: %d\n", passi);
-		printf("\n------------------------------------------------------------------------------------------------\n");
+		        printf("\n------------------------------------------------------------------------------------------------\n");
                 
                 break;
 
@@ -126,19 +126,19 @@ int main (void)
                 InserisciNuovoElemento(&radice, nodo, dati, &passi);
 
                 printf("\nI passi compiuti dall'algoritmo per inserire i dati sono: %d\n", passi);
-		printf("\n------------------------------------------------------------------------------------------------\n");
+		        printf("\n------------------------------------------------------------------------------------------------\n");
 
                 break;
 
             case 3:             /* caso in cui l'utente abbia scelto di rimuovere un elemento */
                 passi = 0;
-		VerificaIdVeicolo(id_veicolo);
+		        VerificaIdVeicolo(id_veicolo);
                 if(RimuoviElemento(&radice, id_veicolo, dati, &passi) == 0)
                     printf("\nNon e' stato trovato nessun elemento da eliminare\n");
                 else
                     printf("\nVeicolo rimosso\n");
                 printf("\nI passi compiuti dall'algoritmo per rimuovere l'elemento selezionato sono: %d\n", passi);
-		printf("\n------------------------------------------------------------------------------------------------\n");
+		        printf("\n------------------------------------------------------------------------------------------------\n");
 
                 break;
 
@@ -149,7 +149,7 @@ int main (void)
                 passi = 0;
                 RicercaMin(radice, &passi);
                 printf("\nI passi compiuti dall'algoritmo per trovare il valore piu' piccolo sono: %d\n", passi);
-		printf("\n------------------------------------------------------------------------------------------------\n");
+		        printf("\n------------------------------------------------------------------------------------------------\n");
 
                 break;
                 
@@ -217,8 +217,10 @@ int Inserimento(albero **radice, albero *nodo, int *passi)
     /* scorrimento dell'albero per il posizionamento della foglia */
     for(attuale = padre = *radice;
         ((attuale != NULL) && (!NodiUguali(attuale, nodo)));
-        padre = attuale, attuale = NodoMinore(nodo, attuale) ? attuale -> sx : attuale -> dx);
-    *passi += 1;
+        padre = attuale, attuale = NodoMinore(nodo, attuale) ? attuale -> sx : attuale -> dx)
+	{
+    		*passi += 1;
+	}
     /* verifica che non ci siano ripetizioni */
     if(attuale != NULL)
         esito = 0;
@@ -289,7 +291,9 @@ int CercaIdAlbero(albero *radice, char id_veicolo[6], int *passi)
     for (attuale = radice;
         (attuale != NULL) && (strcmp(attuale -> id_veicolo, id_veicolo) != 0);
         attuale = (strcmp(id_veicolo, attuale -> id_veicolo) < 0) ? attuale -> sx: attuale -> dx)
-    *passi += 1;
+	{
+    		*passi += 1;
+	}
 
     /* caso in cui abbia trovato un id veicolo con lo stesso nome */
     if(attuale != NULL)
@@ -301,7 +305,7 @@ int CercaIdAlbero(albero *radice, char id_veicolo[6], int *passi)
                 attuale -> id_veicolo,  attuale -> nome_proprietario,   attuale -> modelli, attuale -> anno);
         *passi += 1;
 
-     }
+    }
     return esito;
 }/* end CercaIdAlbero */
 
@@ -468,10 +472,12 @@ void StampaAlberoParziale(albero *nodo, FILE *file)
     if(nodo != NULL)
     {
         /* analizzo l'albero partendo dal sotto albero sinistro per poi procedere verso destra */
-        StampaAlberoParziale(nodo -> dx, file);
-        fprintf(file, "%s\t%s\t%s\t%d\n\r", 
+ 	    fprintf(file, "%s\t%s\t%s\t%d\n\r", 
                 (nodo -> id_veicolo),  (nodo -> nome_proprietario),    (nodo -> modelli),  (nodo -> anno));
+
         StampaAlberoParziale(nodo -> sx, file);
+        StampaAlberoParziale(nodo -> dx, file);
+
     }
 } /* end StampaAlberoParziale */
 
@@ -487,8 +493,10 @@ int RimuoviElemento(albero **radice, char id_veicolo[7], FILE *file, int *passi)
     /* scorrimento dell'albero per il posizionamento della foglia */
     for(attuale = padre = *radice;
         ((attuale != NULL) && ((strcmp(attuale -> id_veicolo, id_veicolo) != 0)));
-        padre = attuale, attuale = (( strcmp(id_veicolo, attuale -> id_veicolo) < 0) ? (attuale -> sx) : (attuale -> dx)));
-    *passi += 1;
+        padre = attuale, attuale = (( strcmp(id_veicolo, attuale -> id_veicolo) < 0) ? (attuale -> sx) : (attuale -> dx)))
+	{
+    		*passi += 1;
+	}
 
     /* se 'attuale' è vuoto significa che non ci sta nulla da poter rimuovere*/ 
     if(attuale == NULL)
@@ -505,7 +513,7 @@ int RimuoviElemento(albero **radice, char id_veicolo[7], FILE *file, int *passi)
                     padre -> sx = attuale -> dx;
                 else
                     padre -> dx = attuale -> dx;
-	    *passi += 1;
+	        *passi += 1;
         }
         else
             if(attuale -> dx == NULL)
@@ -517,22 +525,23 @@ int RimuoviElemento(albero **radice, char id_veicolo[7], FILE *file, int *passi)
                         padre -> sx = attuale -> sx;
                     else
                         padre -> dx = attuale -> sx;
-		*passi += 1;
+		        *passi += 1;
             }
             else
             {
                 sostituto = attuale;
                 for(padre = sostituto, attuale = sostituto -> sx;
-                    (attuale -> dx != NULL); padre = attuale, attuale = attuale -> dx);
+                    (attuale -> dx != NULL); padre = attuale, attuale = attuale -> dx)
+                {
+                    *passi += 1;
+                }
                 strcpy(sostituto -> id_veicolo, attuale -> id_veicolo);
-	
-		*passi += 1;
 
                 if(padre == sostituto)
                     padre -> sx = attuale -> sx;
                 else    
                     padre -> dx = attuale -> sx;
-		*passi += 1;
+		        *passi += 1;
 
             }
         free(attuale);
@@ -571,7 +580,7 @@ int RicercaMin(albero *nodo, int *passi)
     }
     else	/* raggiunto l'estremo stampo l'id */
     {
-        printf("\nIl valore piu`grande e':\t%s\n", nodo -> id_veicolo);
+        printf("\nIl valore piu' piccolo e':\t%s\n", nodo -> id_veicolo);
         *passi += 1;        
     }
     return 0;

@@ -4,8 +4,9 @@
 # include <string.h>
 # include <time.h>
 
-/***********/
+/*************************/
 /* definizione strutture */
+/*************************/
 
 typedef struct array
 {
@@ -17,7 +18,10 @@ typedef struct modello
     char modello[19];
 }modello_t;
 
+/**************************/
 /* dichiarazione funzioni */
+/**************************/
+
 /* funzione di controllo valori interi*/
 int ValidazioneNumeroVeicoli();
 
@@ -35,9 +39,9 @@ void GeneraModelli(int num_veicoli, FILE *Modelli, char modelli[67][19], modello
 
 int ApriFile(FILE **file);
 
-/* -------------------- */
-/*  DEFINIZIONE FUNZIONE MAIN*/
-/*--------------------*/
+/********************************/
+/*  DEFINIZIONE FUNZIONE MAIN   */
+/********************************/
 int main (void)
 {
     /* dichiarazioni variabili locali*/
@@ -92,9 +96,9 @@ int main (void)
 }/* end main */
 
 
-/* -------------------- */
-/*  DEFINIZIONE FUNZIONi*/
-/*--------------------*/
+/****************************/
+/*  DEFINIZIONE FUNZIONi    */
+/****************************/
 
 /* definizone ValidazioneNumeroVeicoli*/
 int ValidazioneNumeroVeicoli()
@@ -128,9 +132,9 @@ int GeneraAnno()
     ritorno = rand()%(2021-1900+1)+1900;
 
     return ritorno;
-}
+}/* end GeneraAnno*/
 
-/* funzione che genera gli id dei veicoli */
+/* GeneraVeicoli */
 void GeneraIdVeicoli(int num_veicoli, char id_veicolo[7], array *lista_id)
 {
     int i, 
@@ -156,7 +160,7 @@ void GeneraIdVeicoli(int num_veicoli, char id_veicolo[7], array *lista_id)
     }
 }/* end GeneraIdVeicoli*/
 
-/* funzione che genera i nomi dei proprietari */
+/* GenraProprietari */
 void GeneraProprietari(int num_veicoli, char nome_proprietario[7], array *lista_proprietari)
 {
     int i, 
@@ -181,9 +185,7 @@ void GeneraProprietari(int num_veicoli, char nome_proprietario[7], array *lista_
     }    
 }/* end GeneraProprietari */
 
-
-
-/* Definizione GeneraModelli */
+/* GeneraModelli */
 void GeneraModelli(int num_veicoli, FILE *Modelli, char modelli[67][19], modello_t *lista_modelli)
 {
     int controllo;
@@ -209,8 +211,9 @@ void GeneraModelli(int num_veicoli, FILE *Modelli, char modelli[67][19], modello
         n = rand() % 67;
         strcpy(lista_modelli[y].modello, modelli[n]);
     }
-}
+}/* end GeneraModelli */
 
+/* ApriFile */
 int ApriFile(FILE **file)
 {
     /* apro il file in lettura*/
