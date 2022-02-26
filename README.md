@@ -6,7 +6,8 @@ University exam project for the Algorithms and Data Structures course
 ------------
 
 - Specific:
-> Program that simulates a computer system that manages data relating to a vehicle registry.
+
+  Program that simulates a computer system that manages data relating to a vehicle registry.
 
 > For more information see the report.
 
@@ -22,7 +23,8 @@ Progetto d'esame universitario del corso di Algoritmi e Strutture Dati
 ------------
 
 - Specific:
-> Programma che simula un sistema informatico che gestisce i dati relativi a un’anagrafe di autoveicoli.
+
+  Programma che simula un sistema informatico che gestisce i dati relativi a un’anagrafe di autoveicoli.
 
 > Per maggiori informazioni consultare la relazione.
 
