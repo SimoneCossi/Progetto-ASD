@@ -22,7 +22,7 @@ Progetto d'esame universitario del corso di Algoritmi e Strutture Dati
 
 ------------
 
-- Specific:
+- Specifica:
 
   Programma che simula un sistema informatico che gestisce i dati relativi a un’anagrafe di autoveicoli.
 
